@@ -78,10 +78,23 @@ export interface PluginOptions {
 	autoDetectPageTitle?: boolean;
 
 	/**
+	 * If a page like Test.md has a corresponding Test folder including
+	 * other .md then they will be auto-added as children pages
+	 * 
+	 * This defaults to false
+	 */
+	autoPopulateChildren?: boolean;
+
+	/**
 	 * Root directory where all page source files live
 	 * 
 	 * By default this will point to the directory that TypeDoc is run from.
 	 */
 	source?: string;
+
+	/**
+	 * Title in case groups are not used
+	 */
+	title?: string;
 
 }

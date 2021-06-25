@@ -7,6 +7,8 @@ import { join } from "path";
 import { ChildPageDefinition, PageDefinition, PageGroupDefinition, PageSectionDefinition, PluginOptions } from "../options/models/";
 import { getFilename } from "../utilities/path-utilities";
 import { ChildPage, Page, PageDictionary, PageGroup, PageSection } from "./models/";
+import * as fs from "fs";
+import * as path from "path";
 
 // TODO: document this
 export class PageDictionaryFactory {	
@@ -18,6 +20,29 @@ export class PageDictionaryFactory {
 
 		for (const group of options.groups) {
 			groups.push(this._parsePageGroup(group, options.output));
+		}
+
+		if (options.autoPopulateChildren && !options.groups.length && options.source) {
+			const params = {
+				source: `${options.source}`,
+				title: options.title,
+				output: "",
+				pages: []
+			};
+			const folderWalk = (subpath, children) => {
+				const files = fs.readdirSync(subpath);
+				files.filter(f => f.endsWith(".md")).forEach(f => {
+					const base = f.substr(0, f.length - 3);
+					const child = {source: path.join(subpath, f), output: `${base}.html`, children: []};
+					children.push(child);
+					const childrenPath = path.join(subpath, base);
+					if (fs.existsSync(childrenPath) && fs.lstatSync(childrenPath).isDirectory()) {
+						folderWalk(childrenPath, child.children);
+					}
+				});
+			};
+			folderWalk(options.source, params.pages);
+			groups.push(this._parsePageGroup(params, options.output || ""));
 		}
 
 		return new PageDictionary(groups);

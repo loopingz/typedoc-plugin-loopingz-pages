@@ -9,7 +9,7 @@ import { PageSectionDefinition } from "./page-section-definition";
 // TODO: Document this
 export interface PageGroupDefinition {
 	output?: string;
-	pages: Array<PageDefinition|PageSectionDefinition>;
+	pages?: Array<PageDefinition|PageSectionDefinition>;
 	source?: string;
 	title: string;
 }

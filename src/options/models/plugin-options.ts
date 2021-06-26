@@ -3,7 +3,6 @@
  * @module Options
  */
 
-import { PageGroupDefinition } from "./page-group-definition";
 
 /**
  * Plugin options
@@ -29,13 +28,6 @@ export interface PluginOptions {
 	 * This defaults to false.
 	 */
 	failBuildOnInvalidPageLink?: boolean;
-
-	/**
-	 * Page group definitions
-	 * 
-	 * This is where you define the groups your pages live in.
-	 */
-	groups?: PageGroupDefinition[];
 
 	/**
 	 * Writes a list of any broken page links to the console
@@ -93,8 +85,8 @@ export interface PluginOptions {
 	source?: string;
 
 	/**
-	 * Title in case groups are not used
+	 * Root directories to scan
 	 */
-	title?: string;
+	sources?: string[];
 
 }

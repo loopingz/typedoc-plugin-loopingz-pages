@@ -6,7 +6,7 @@
 import { MarkdownEvent, PageEvent } from "typedoc/dist/lib/output/events";
 import { Logger } from "typedoc/dist/lib/utils";
 import { PluginOptions } from "../options/models/";
-import { PageDictionary, PageGroup } from "../pages/models/";
+import { PageDictionary } from "../pages/models/";
 import { getRelativeUrl } from "../utilities/path-utilities";
 import { InvalidPageLink } from "./invalid-page-link";
 
@@ -124,16 +124,6 @@ export class PageLinkParser {
 			}
 
 			let url = item.url;
-
-			// If the link is for a group, direct the link at the first page in the group
-			if (item instanceof PageGroup) {
-				url = item.pages.length.toString();
-				if (item.pages.length === 0) {
-					throw new Error(`Cannot create page link for group "${item.title}" because it has no pages.`);
-				}
-
-				url = item.pages[0].url;
-			}
 
 			// Convert the absolute URL to one relative to the current page being rendered
 			const relativeUrl = this._getRelativeUrl(url, this._currentPageUrl);

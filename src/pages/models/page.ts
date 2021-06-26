@@ -3,29 +3,94 @@
  * @module Models
  */
 
-import { PageDefinition } from "../../options/models/";
-import { ChildPage } from "./child-page";
-import { PageBase } from "./page-base";
-import { PageGroup } from "./page-group";
-import { PageSection } from "./page-section";
+import { readFileSync } from "fs";
+import { basename, join } from "path";
 
 // TODO: Document this
-export class Page extends PageBase {
-	private _children: Array<ChildPage|PageSection>;
-	private _parent: PageGroup;
+export abstract class Page {
+	static registry: {ext: string, func: new (src: string, parent?: Page) => Page}[] = [];
 
-	constructor(definition: PageDefinition, parent: PageGroup) {
-		super(definition, parent.url);
+	protected _title: string;
+	protected _url: string;
+	protected _childrenUrl: string;
+	private _children: Array<Page>;
+	private _parent: Page;
+
+	protected _contents: string|undefined;
+	private _source: string;
+
+	constructor(source: string, parent?: Page) {
+		this._source = source;
+		this._contents = readFileSync(this.source, "utf8");
 		this._children = [];
 		this._parent = parent;
-		parent.pages.push(this);
+		let filename = basename(source);
+		if (filename.indexOf(".") > 0) {
+			filename = filename.substr(0, filename.lastIndexOf("."));
+		}
+		if (parent) {
+			this._childrenUrl = join(parent.childrenUrl, filename);
+			this._url = join(parent.childrenUrl, filename + ".html");
+			parent.children.push(this);
+		} else {
+			this._childrenUrl = join('pages', filename);
+			this._url = join('pages', filename + ".html");
+		}
 	}
 
-	public get children(): Array<ChildPage|PageSection> {
+	protected computeTitle(): string {
+		return basename(this.source);
+	}
+
+	public get children(): Array<Page> {
 		return this._children;
 	}
 
-	public get parent(): PageGroup {
+	public get parent(): Page {
 		return this._parent;
+	}
+
+	public get title(): string {
+		if (!this._title) {
+			this._title = this.computeTitle();
+		}
+		return this._title;
+	}
+
+	public get url(): string {
+		return this._url;
+	}
+
+	public get childrenUrl() : string {
+		return this._childrenUrl;
+	}
+
+	public abstract get template(): string;
+
+	public get contents(): string {
+		try {
+			if (!this._contents) {
+				this._contents = readFileSync(this.source, "utf8");
+			}
+			return this._contents;
+		} catch (e) {
+			throw new Error(`Failed to get page contents. ${e}`);
+		}
+	}
+
+
+	public get source(): string {
+		return this._source;
+	}
+
+	static getPageFromFile(path: string, parent?: Page) : Page {
+		let info = Page.registry.filter(p => path.endsWith(p.ext)).pop();
+		if (info) {
+			return new info.func(path, parent);
+		}
+	}
+
+	static registerExtension(ext: string, func: new (src: string, parent?: Page) => Page) {
+		Page.registry.push({ext, func});
 	}
 }

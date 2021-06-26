@@ -5,7 +5,7 @@
 
 import { IndexData } from "./models/search-index";
 import { IndexDataRow } from "./models/index-row";
-import { Page, PageBase, PageDictionary, PageGroup, PageSection } from "../pages/models";
+import { Page, PageDictionary } from "../pages/models";
 
 // TODO: Document this
 export class IndexDataManager {
@@ -35,24 +35,14 @@ export class IndexDataManager {
 
 	private _addPages(indexData: IndexData): void {
 		indexData.kinds["9999999"] = "Page";
-		for (const group of this._pages.all) {
-			this._addGroupToIndex(indexData, group);
-		}
-	}
-
-	private _addGroupToIndex(index: IndexData, group: PageGroup): void {
-		for (const groupItem of group.pages) {
-			if (groupItem instanceof PageBase) {
-				this._addPageToIndex(index, groupItem);
-			} else if (groupItem instanceof PageSection) {
-				for (const group of groupItem.groups) {
-					this._addGroupToIndex(index, group);
-				}
+		for (const page of this._pages.all) {
+			if (!page.parent) {
+				this._addPageToIndex(indexData, page);
 			}
 		}
 	}
 
-	private _addPageToIndex(index: IndexData, page: PageBase): void {
+	private _addPageToIndex(index: IndexData, page: Page): void {
 		const highestRowId = index.rows[index.rows.length - 1].id;
 		const row: IndexDataRow = {
 			id: highestRowId + 1,
@@ -66,16 +56,8 @@ export class IndexDataManager {
 		};
 		index.rows.push(row);
 	
-		if (page instanceof Page) {
-			for (const childItem of page.children) {
-				if (childItem instanceof PageBase) {
-					this._addPageToIndex(index, childItem);
-				} else if (childItem instanceof PageSection) {
-					for (const group of childItem.groups) {
-						this._addGroupToIndex(index, group);
-					}
-				}
-			}
+		for (const childItem of page.children) {
+			this._addPageToIndex(index, childItem);
 		}
 	}
 }

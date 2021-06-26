@@ -5,9 +5,9 @@
 
 import { PageEvent } from "typedoc/dist/lib/output/events";
 import { PluginOptions } from "../options/models/";
-import { BaseItem, ChildPage, Page, PageDictionary, PageGroup, PageSection } from "../pages/models/";
+import { Page, PageDictionary } from "../pages/models/";
 import { NavigationItemFactory } from "./navigation-item-factory";
-import { PluginPageUrlMappingModel, ModelItemType } from "./plugin-page-url-mapping-model";
+import { PluginPageUrlMappingModel } from "./plugin-page-url-mapping-model";
 import { PluginNavigationItem } from "./plugin-navigation-item";
 
 /**
@@ -62,52 +62,17 @@ export class NavigationRenderer {
 	//#region NavigationItem Construction Helpers
 
 	private _getPluginNavigationItems(event: PageEvent, isPluginItem: boolean): PluginNavigationItem[] {
-		let groupsToRender: PageGroup[] = [];
-		if (isPluginItem) {
-			// If the page being rendered is a plugin page, we need to collect all of the page groups that should be rendered in this particular page's navigation sidebar
-			groupsToRender = this._getGroupsForNavigation(event.model, this._pages.all);
-		} else {
-			// If the page being rendered is not a plugin page, we should render all page groups in this particular page's navigation sidebar
-			groupsToRender = this._pages.all;
-		}
-
-		return this._buildNavigationForPageGroups(event, groupsToRender);
+		const pages = [...this._pages.all];
+		return this._buildNavigationForPageGroups(event, pages.filter(p => !p.parent));
 	}
 
-	private _getGroupsForNavigation(currentPageModel: PluginPageUrlMappingModel, allGroups: PageGroup[]): PageGroup[] {
-		let nearestGroup: PageGroup;
-		const item = currentPageModel.pagesPlugin.item;
-	
-		switch (currentPageModel.pagesPlugin.type) {
-			case ModelItemType.Group:
-				nearestGroup = item as PageGroup;
-				break;
-			case ModelItemType.Page:
-				nearestGroup = (item as Page).parent;
-				break;
-			case ModelItemType.ChildPage:
-				nearestGroup = (item as ChildPage).parent.parent;
-				break;
-			case ModelItemType.Section:
-				return (item as PageSection).groups;
-		}
-
-		if (nearestGroup.parent) {
-			return nearestGroup.parent.groups;
-		} else {
-			return allGroups;
-		}
-	}
-
-	private _buildNavigationForPageGroups(event: PageEvent, groups: PageGroup[]): PluginNavigationItem[] {
+	private _buildNavigationForPageGroups(event: PageEvent, pages: Page[]): PluginNavigationItem[] {
 		let items: PluginNavigationItem[] = [];
-
-		this._buildBackButton(items, event);
 	
-		for (const group of groups) {
+		for (const page of pages) {
 			items = [
 				...items,
-				...this._itemFactory.buildPageGroupItems(group, event.model, event.url),
+				...this._itemFactory.buildPageItems(page, event.model, event.url),
 			];
 		}
 	
@@ -140,51 +105,6 @@ export class NavigationRenderer {
 					event.navigation.children.splice(i, 1);
 				}
 			}
-		}
-	}
-
-	//#endregion
-
-	//#region Back Button Helpers
-
-	private _buildBackButton(items: PluginNavigationItem[], event: PageEvent): void {
-		// No need for a back button if this is not a plugin page
-		if (!event.model.pagesPlugin.item) {
-			return;
-		}
-		
-		const target = this._getBackButtonTarget((event.model.pagesPlugin as PluginPageUrlMappingModel).item);
-
-		if (!target) {
-			return;
-		}
-
-		let title: string;
-		let url: string;
-
-		if (target instanceof Page) { // Back button should redirect to parent page if the section is a child of a page
-			title = target.title;
-			url = target.url;
-		} else {
-			const group = target as PageGroup;
-			title = group.title;
-			url = group.pages[0].url;
-		}
-
-		items.push(this._itemFactory.buildBackButton(`🡠 Back to ${title}`, url));
-	}
-
-	private _getBackButtonTarget(item: BaseItem): BaseItem {
-		if (undefined) {
-			return undefined;
-		} else if (item instanceof Page) {
-			return this._getBackButtonTarget(item.parent);
-		} else if (item instanceof ChildPage) {
-			return this._getBackButtonTarget(item.parent.parent);
-		} else if (item instanceof PageGroup) {
-			return this._getBackButtonTarget(item.parent);
-		} else if (item instanceof PageSection) {
-			return item.parent;
 		}
 	}
 

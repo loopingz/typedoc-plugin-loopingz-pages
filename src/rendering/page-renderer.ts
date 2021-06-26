@@ -6,7 +6,7 @@
 import { UrlMapping } from "typedoc";
 import { RendererEvent } from "typedoc/dist/lib/output/events";
 import { PluginOptions } from "../options/models/";
-import { BaseItem, Page, ChildPage, PageSection, PageDictionary, PageGroup } from "../pages/models/";
+import { PageDictionary, Page } from "../pages/models/";
 import { UrlMappingModelPluginMetadata, ModelItemType } from "./plugin-page-url-mapping-model";
 
 /**
@@ -55,7 +55,6 @@ export class PageRenderer {
 				...this._createMappings(group, template),
 			];
 		}
-
 		// Register the pages so they are rendered
 		event.urls = [
 			...event.urls,
@@ -83,24 +82,14 @@ export class PageRenderer {
 	 * @param parentModel The parent object's model (if there is a parent object)
 	 * @returns An array of generate UrlMappings for the item and its sub items
 	 */
-	private _createMappings(item: BaseItem, template: UrlMapping, parentModel?: any): UrlMapping[] {
+	private _createMappings(item: Page, template: UrlMapping, parentModel?: any): UrlMapping[] {
 		let mappings: UrlMapping[] = [];
 	
 		const itemMapping = this._createUrlMapping(template, item, parentModel);
 		mappings.push(itemMapping);
 	
-		if (item instanceof PageGroup) {
-			for (const page of item.pages) {
-				mappings = mappings.concat(this._createMappings(page, template, itemMapping.model));
-			}
-		} else if (item instanceof Page) {
-			for (const child of item.children) {
-				mappings = mappings.concat(this._createMappings(child, template, itemMapping.model));
-			}
-		} else if (item instanceof PageSection) {
-			for (const group of item.groups) {
-				mappings = mappings.concat(this._createMappings(group, template, itemMapping.model));
-			}
+		for (const child of item.children) {
+			mappings = mappings.concat(this._createMappings(child, template, itemMapping.model));
 		}
 	
 		return mappings;
@@ -113,7 +102,7 @@ export class PageRenderer {
 	 * @param parentModel Parent object's model (If there is no parent, the template mapping's model will be used.)
 	 * @returns The created mapping
 	 */
-	private _createUrlMapping(templateMapping: UrlMapping, item: BaseItem, parentModel?: any): UrlMapping {
+	private _createUrlMapping(templateMapping: UrlMapping, item: Page, parentModel?: any): UrlMapping {
 		const model: any = {};
 	
 		// Copy properties from template
@@ -126,26 +115,9 @@ export class PageRenderer {
 		model.parent = parentModel || templateMapping.model;
 		model.url = item.url;
 		model.name = item.title;
+		model.pagesPlugin = {item};
 	
-		if (item instanceof Page) {
-			model.pagesPlugin = this._getPluginModelMetadata(true, item, ModelItemType.Page);
-		} else if (item instanceof ChildPage) {
-			model.pagesPlugin = this._getPluginModelMetadata(true, item, ModelItemType.ChildPage);
-		} else if (item instanceof PageGroup) {
-			const group = item as PageGroup;
-			model.pagesPlugin = this._getPluginModelMetadata(true, item, ModelItemType.Group);
-			if (group.pages.length > 0) {
-				model.url = group.pages[0].url;
-			}
-		} else if (item instanceof PageSection) {
-			const section = item as PageSection;
-			model.pagesPlugin = this._getPluginModelMetadata(true, item, ModelItemType.Section);
-			if (section.groups.length > 0) {
-				model.url = section.groups[0].pages[0].url;
-			}
-		}
-
-		return new UrlMapping(model.url, model, "markdown-page.hbs"); // TODO: make this configuraable
+		return new UrlMapping(model.url, model, item.template); // TODO: make this configuraable
 	}
 
 	private _replaceGlobalsPage(globalsMapping: UrlMapping, templateMapping: UrlMapping): void {
@@ -153,7 +125,7 @@ export class PageRenderer {
 		globalsMapping.model.url = templateMapping.url;
 	}
 
-	private _getPluginModelMetadata(isPluginItem: boolean, item?: BaseItem, type?: ModelItemType): UrlMappingModelPluginMetadata {
+	private _getPluginModelMetadata(isPluginItem: boolean, item?: Page, type?: ModelItemType): UrlMappingModelPluginMetadata {
 		return {
 			isPluginItem: isPluginItem,
 			item,

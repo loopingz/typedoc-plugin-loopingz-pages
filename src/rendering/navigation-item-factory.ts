@@ -4,7 +4,7 @@
  */
 
 import { NavigationItem } from "typedoc";
-import { ChildPage, Page, PageGroup, PageSection } from "../pages/models/";
+import { Page } from "../pages/models/";
 import { PluginPageUrlMappingModel } from "./plugin-page-url-mapping-model";
 import { PluginNavigationItem } from "./plugin-navigation-item";
 
@@ -30,41 +30,6 @@ export class NavigationItemFactory {
 	}
 
 	/**
-	 * Creates tje TypeDoc navigation items for a page group
-	 *
-	 * @param navigationItemGroup Group to render the navigation item for
-	 * @param pageRenderModel Model for the current page render
-	 * @param urlBeingRendered The URL of the current page render
-	 * @returns The created navigation items
-	 */
-	public buildPageGroupItems(navigationItemGroup: PageGroup, pageRenderModel: PluginPageUrlMappingModel, urlBeingRendered: string): PluginNavigationItem[] {
-		let items: PluginNavigationItem[] = [];
-
-		items.push(this.buildLabelItem(navigationItemGroup.title, false));
-
-		for (const groupMember of navigationItemGroup.pages) {
-			if (groupMember instanceof Page) {
-				items = [
-					...items,
-					...this.buildPageItems(groupMember, pageRenderModel, urlBeingRendered),
-				];
-			} else if (groupMember instanceof PageSection) {
-				items = [
-					...items,
-					...this.buildSectionItems(groupMember),
-				];
-			}
-		}
-
-		return items;
-	}
-
-	public buildSectionItems(section: PageSection): PluginNavigationItem[] {
-		const url = section.groups[0].pages[0].url;
-		return [this.buildItem(section.title, url, false, false, false, false)];
-	}
-
-	/**
 	 * Creates the TypeDoc navigation items for a page
 	 *
 	 * @param navigationItemPage Page to render the navigation item for
@@ -75,28 +40,29 @@ export class NavigationItemFactory {
 	public buildPageItems(navigationItemPage: Page, pageRenderModel: PluginPageUrlMappingModel, urlBeingRendered: string): PluginNavigationItem[] {
 		let items: PluginNavigationItem[] = [];
 
-		const thisIsParent = navigationItemPage.children.length > 0;
-		const thisIsActivePage = pageRenderModel.pagesPlugin && pageRenderModel.pagesPlugin.item === navigationItemPage;
 		const childIsActivePage = pageRenderModel.pagesPlugin && pageRenderModel.pagesPlugin.item && pageRenderModel.pagesPlugin.item.parent === navigationItemPage;
 
-		items.push(this.buildItem(navigationItemPage.title, navigationItemPage.url, navigationItemPage.url === urlBeingRendered, false, thisIsParent, childIsActivePage));
+		items.push(this.buildItem(navigationItemPage, navigationItemPage.url === urlBeingRendered, childIsActivePage));
 
-		if (thisIsActivePage || childIsActivePage) {
-			for (const child of navigationItemPage.children) {
-				if (child instanceof ChildPage) {
-					items = [
-						...items,
-						...this.buildChildPageItems(child, urlBeingRendered),
-					];
-				} else if (child instanceof PageSection) {
-					items = [
-						...items,
-						...this.buildSectionItems(child),
-					];
-				}
+		let found = false;
+		let parent = pageRenderModel.pagesPlugin.item;
+		let parents = [];
+		while (parent) {
+			if (parent === navigationItemPage) {
+				found = true;
+				break;
+			}
+			parents.push(parent);
+			parent = parent.parent;
+		}
+		if (found) {
+			for (const child of parent.children) {
+				items = [
+					...items,
+					...this.buildChildPageItems(child, urlBeingRendered, parents),
+				];
 			}
 		}
-
 		return items;
 	}
 
@@ -107,10 +73,19 @@ export class NavigationItemFactory {
 	 * @param urlBeingRendered The URL of the current page render
 	 * @returns The created navigation items
 	 */
-	public buildChildPageItems(navigationItemPage: ChildPage, urlBeingRendered: string): PluginNavigationItem[] {
+	public buildChildPageItems(navigationItemPage: Page, urlBeingRendered: string, pages : Page[]): PluginNavigationItem[] {
 		const items: PluginNavigationItem[] = [];
 
-		items.push(this.buildItem(navigationItemPage.title, navigationItemPage.url, navigationItemPage.url === urlBeingRendered, true, false, false));
+		items.push(this.buildItem(navigationItemPage, navigationItemPage.url === urlBeingRendered, false));
+		if (pages.indexOf(navigationItemPage) >= 0) {
+			for (const child of navigationItemPage.children) {	
+				if (pages.indexOf(child) >= 0) {
+					items.push(...this.buildChildPageItems(child, urlBeingRendered, pages));
+				} else {
+					items.push(this.buildItem(child, child.url === urlBeingRendered, false));
+				}
+			}
+		}
 
 		return items;
 	}
@@ -126,23 +101,22 @@ export class NavigationItemFactory {
 	 * @param isParentOfActive Whether the item is a parent of the active page
 	 * @returns The created navigation item
 	 */
-	public buildItem(label: string, url: string, isActive: boolean, isChild: boolean, isParent: boolean, isParentOfActive: boolean): PluginNavigationItem {
-		const item = new NavigationItem(label, url) as PluginNavigationItem;
-
+	public buildItem(model: Page, isActive: boolean, isParentOfActive: boolean): PluginNavigationItem {
+		const item = new NavigationItem(model.title, model.url) as PluginNavigationItem;
+		let deep = 0;
+		let parent = model.parent;
+		while (parent) {
+			deep++;
+			parent = parent.parent;
+		}
 		item.isPluginItem = true;
 		item.isLabel = false;
 		item.isVisible = true;
 		item.isInPath = isActive;
 
-		let cssClasses = "pp-nav pp-page";
-		if (isChild) {
-			cssClasses += " pp-child";
-		} else if (isParent) {
-			cssClasses += " pp-parent";
-
-			if (isParentOfActive) {
-				cssClasses += " pp-active";
-			}
+		let cssClasses = `pp-nav pp-page pp-depth-${deep}`;
+		if (isParentOfActive) {
+			cssClasses += " pp-active";
 		}
 		item.cssClasses = cssClasses;
 

@@ -4,19 +4,16 @@
  */
 
 
-import { BaseItem } from "../pages/models/";
+import { Page } from "../pages/models/";
 
 // TODO: Document this
 export enum ModelItemType {
-	Page = "page",
-	ChildPage = "childpage",
-	Group = "group",
-	Section = "section",
+	Page = "page"
 }
 
 export interface UrlMappingModelPluginMetadata {
 	isPluginItem: boolean;
-	item?: BaseItem;
+	item?: Page;
 	options: {
 		replaceGlobalsPage: boolean;
 	};

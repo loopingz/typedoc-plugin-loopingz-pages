@@ -30,6 +30,7 @@ export class SearchIndexBuilder implements SearchManager {
 	}
 
 	public populateSearchIndex(event: RendererEvent): void {
+		return;
 		try {
 			// Do not populate search index if it has been disabled via options
 			if (!this._options.enableSearch) {

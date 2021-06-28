@@ -1,6 +1,6 @@
 {
   "name": "typedoc-plugin-loopingz-pages",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A TypeDoc plugin that lets you integrate your own pages into the documentation output",
   "main": "dist/plugin/index.js",
   "files": [

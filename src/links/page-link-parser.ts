@@ -123,7 +123,7 @@ export class PageLinkParser {
 				throw new Error(`Failed to find page or group with title "${pageTitle}"`);
 			}
 
-			let url = item.url;
+			const url = item.url;
 
 			// Convert the absolute URL to one relative to the current page being rendered
 			const relativeUrl = this._getRelativeUrl(url, this._currentPageUrl);

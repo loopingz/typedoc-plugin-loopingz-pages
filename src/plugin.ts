@@ -7,6 +7,7 @@ import { Application } from "typedoc/dist/";
 import { Converter } from "typedoc/dist/lib/converter/converter";
 import { Component, RendererComponent } from "typedoc/dist/lib/output/components";
 import { MarkdownEvent, PageEvent, RendererEvent } from "typedoc/dist/lib/output/events";
+import { writeFileSync } from "typedoc/dist/lib/utils";
 import { PLUGIN_NAME } from "./constants";
 import { PageLinkParser } from "./links/page-link-parser";
 import { OptionManager } from "./options/option-manager";
@@ -18,6 +19,7 @@ import { PageRenderer } from "./rendering/page-renderer";
 import { SearchManager } from "./search/search-manager";
 import { SearchManagerFactory } from "./search/search-manager-factory";
 import { ThemeManager } from "./theme/theme-manager";
+import * as path from "path";
 
 /**
  * Pages plugin for integrating your own pages into documentation output
@@ -111,10 +113,21 @@ export class PagesPlugin extends RendererComponent {
 	 * @param event TypeDoc Renderer event
 	 */
 	private _renderEndEventHandler(event: RendererEvent): void {
+		const options = this._optionManager.getPluginOptions(this.application.options);
+
 		// Populate the TypeDoc search index
 		this._searchManager.populateSearchIndex(event);
 
 		// List any invalid page links
 		this._pageLinkParser.listInvalidPageLinks();
+
+		if (options.githubPagesDomain) {
+			writeFileSync(path.join(event.outputDirectory, "CNAME"), options.githubPagesDomain);
+
+		}
+
+		if (options.noJekyll) {
+			writeFileSync(path.join(event.outputDirectory, ".nojekyll"), '');
+		}
 	}
 }

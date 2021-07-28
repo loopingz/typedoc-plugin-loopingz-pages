@@ -8,7 +8,7 @@ import { OPTIONS_NAME, PLUGIN_NAME } from "./constants";
 import { ParameterType } from "typedoc/dist/lib/utils/options/declaration";
 import { PagesPlugin } from "./plugin";
 
-export = (PluginHost: Application): void => {
+export function load(PluginHost: Application): void {
 	const app = PluginHost.owner;
 
 	// Register options

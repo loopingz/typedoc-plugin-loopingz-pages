@@ -1,6 +1,6 @@
 {
   "name": "typedoc-plugin-loopingz-pages",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "A TypeDoc plugin that lets you integrate your own pages into the documentation output",
   "main": "dist/plugin/index.js",
   "files": [
@@ -28,7 +28,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mipatterson/typedoc-plugin-pages.git"
+    "url": "git+https://github.com/loopingz/typedoc-plugin-loopingz-pages.git"
   },
   "keywords": [
     "typedocplugin",
@@ -37,11 +37,19 @@
     "plugin"
   ],
   "author": "Mike Patterson",
+  "contributors": [
+    {
+      "name": "Mike Patterson"
+    },
+    {
+      "name": "Remi Cattiau"
+    }
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mipatterson/typedoc-plugin-pages/issues"
+    "url": "https://github.com/loopingz/typedoc-plugin-loopingz-pages/issues"
   },
-  "homepage": "https://github.com/mipatterson/typedoc-plugin-pages#readme",
+  "homepage": "https://github.com/loopingz/typedoc-plugin-loopingz-pages#readme",
   "devDependencies": {
     "@types/jest": "^25.2.1",
     "@types/node": "^13.13.5",
@@ -63,7 +71,7 @@
     "semantic-release": "^17.0.7",
     "serve-static": "^1.14.1",
     "ts-jest": "^25.5.0",
-    "typedoc": "^0.17.6",
+    "typedoc": "^0.21.0",
     "typedoc-plugin-external-module-name": "^3.1.0",
     "typemoq": "^2.1.0",
     "typescript": "^4.0.5"

@@ -2,7 +2,7 @@ import { MarkdownEvent, PageEvent } from "typedoc/dist/lib/output/events";
 import { PageLinkParser, INVALID_LINKS_HEADER_STRING } from "../../../src/links/page-link-parser";
 import { IMock, Mock, It, Times } from "typemoq";
 import { PluginOptions } from "../../../src/options/models";
-import { PageDictionary, Page, PageGroup } from "../../../src/pages/models";
+import { PageDictionary, Page, HtmlPage } from "../../../src/pages/models";
 import { Logger } from "typedoc/dist/lib/utils";
 
 interface TestCase {
@@ -106,21 +106,9 @@ describe("PageLinkParser", () => {
 	}
 
 	function addGroupToDictionary(title: string, firstPageUrl?: string): void {
-		const group = new PageGroup({
-			title,
-			source: ".",
-			output: "",
-			pages: []
-		}, "");
-		const groupHasPages = !!firstPageUrl;
-		if (groupHasPages) {
-			new Page({
-				title: "Sub-page",
-				source: "source",
-				output: firstPageUrl,
-			}, group);
-		}
-		pageDictionaryMock.setup(m => m.getByTitle(title)).returns(() => group);
+
+		const page = new HtmlPage("source");
+		pageDictionaryMock.setup(m => m.getByTitle(title)).returns(() => page);
 	}
 
 	beforeEach(() => {

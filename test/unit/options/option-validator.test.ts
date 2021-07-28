@@ -10,7 +10,7 @@ describe("OptionValidator", () => {
 	let sut: OptionValidator;
 
 	const minimalOptions = {
-		groups: [],
+		
 	};
 
 	beforeEach(() => {
@@ -41,12 +41,6 @@ describe("OptionValidator", () => {
 			sut.validate(minimalOptions);
 
 			expect(defaultOptionAndValidateIsBooleanMock).toHaveBeenCalledWith(minimalOptions, "failBuildOnInvalidPageLink", Constants.DEFAULT_FAIL_BUILD_ON_INVALID_PAGE_LINK);
-		});
-
-		it("validates groups is array", () => {
-			sut.validate(minimalOptions);
-
-			expect(defaultOptionAndValidateIsArrayMock).toHaveBeenCalledWith(minimalOptions, "groups", []);
 		});
 
 		it("validates listInvalidPageLinks", () => {

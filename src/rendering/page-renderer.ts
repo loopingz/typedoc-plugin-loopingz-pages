@@ -36,7 +36,9 @@ export class PageRenderer {
 		if (this._options.replaceGlobalsPage) {
 			const globals = this._getGlobalsUrlMapping(event);
 			const template = this._getTemplateUrlMapping(event);
-			this._replaceGlobalsPage(globals, template);
+			if (globals && template) {
+				this._replaceGlobalsPage(globals, template);
+			}
 		}
 	}
 

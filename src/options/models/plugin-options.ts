@@ -89,4 +89,13 @@ export interface PluginOptions {
 	 */
 	sources?: string[];
 
+	/**
+	 * Add a CNAME with the domain to the root of the doc
+	 */
+	githubPagesDomain?: string;
+
+	/**
+	 * No jekyll
+	 */
+	noJekyll?: boolean;
 }

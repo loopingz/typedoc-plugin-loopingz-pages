@@ -19,7 +19,7 @@ export class PageDictionary {
 	}
 
 
-	addPage(page: Page) : void {
+	addPage(page: Page): void {
 		if (this._sources.indexOf(page.source) >= 0) {
 			return;
 		}
@@ -28,6 +28,6 @@ export class PageDictionary {
 	}
 
 	public getByTitle(title: string): Page {
-		return ([...this._pages].filter((p:Page) => p.title === title).pop());
+		return ([...this._pages].filter((p: Page) => p.title === title).pop());
 	}
 }

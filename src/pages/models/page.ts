@@ -8,7 +8,7 @@ import { basename, join } from "path";
 
 // TODO: Document this
 export abstract class Page {
-	static registry: {ext: string, func: new (src: string, parent?: Page) => Page}[] = [];
+	static registry: {ext: string, func: new (src: string, parent?: Page) => Page}[] = []; // eslint-disable-line
 
 	protected _title: string;
 	protected _url: string;
@@ -61,7 +61,7 @@ export abstract class Page {
 		return this._url;
 	}
 
-	public get childrenUrl() : string {
+	public get childrenUrl(): string {
 		return this._childrenUrl;
 	}
 
@@ -83,14 +83,14 @@ export abstract class Page {
 		return this._source;
 	}
 
-	static getPageFromFile(path: string, parent?: Page) : Page {
-		let info = Page.registry.filter(p => path.endsWith(p.ext)).pop();
+	static getPageFromFile(path: string, parent?: Page): Page {
+		const info = Page.registry.filter(p => path.endsWith(p.ext)).pop();
 		if (info) {
 			return new info.func(path, parent);
 		}
 	}
 
-	static registerExtension(ext: string, func: new (src: string, parent?: Page) => Page) {
+	static registerExtension(ext: string, func: new (src: string, parent?: Page) => Page): void {
 		Page.registry.push({ext, func});
 	}
 }

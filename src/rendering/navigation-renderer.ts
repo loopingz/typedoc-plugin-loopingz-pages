@@ -45,7 +45,7 @@ export class NavigationRenderer {
 		this._ensureStandardNavigationVisible(event, isPluginItem);
 		this._removeGlobalsNavigationItem(event);
 
-		const pluginNavigationItems = this._getPluginNavigationItems(event, isPluginItem);
+		const pluginNavigationItems = this._getPluginNavigationItems(event);
 
 		// Clear out all previously added plugin items
 		const nonPluginItems = event.navigation.children.filter((item: PluginNavigationItem) => {
@@ -61,7 +61,7 @@ export class NavigationRenderer {
 
 	//#region NavigationItem Construction Helpers
 
-	private _getPluginNavigationItems(event: PageEvent, isPluginItem: boolean): PluginNavigationItem[] {
+	private _getPluginNavigationItems(event: PageEvent): PluginNavigationItem[] {
 		const pages = [...this._pages.all];
 		return this._buildNavigationForPageGroups(event, pages.filter(p => !p.parent));
 	}
@@ -101,9 +101,11 @@ export class NavigationRenderer {
 	private _removeGlobalsNavigationItem(event: PageEvent): void {
 		if (this._options.replaceGlobalsPage) {
 			for (let i = 0; i < event.navigation.children.length; i++) {
+				/*
 				if (event.navigation.children[i].isGlobals) {
 					event.navigation.children.splice(i, 1);
 				}
+				*/
 			}
 		}
 	}

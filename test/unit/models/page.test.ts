@@ -1,5 +1,4 @@
-import { Page, PageGroup } from "../../../src/pages/models";
-import { PageDefinition } from "../../../src/options/models";
+import { Page } from "../../../src/pages/models";
 import { Mock, IMock, Times } from "typemoq";
 import * as fs from "fs";
 import * as path from "path";
@@ -7,10 +6,7 @@ import * as path from "path";
 describe("Page", () => {
 	let originalJoin: any;
 	let joinMock: any;
-	let definition: PageDefinition;
 	const groupUrl = "./group/directory";
-	let parentMock: IMock<PageGroup>;
-	let parentPagesMock: IMock<Page[]>;
 
 	let sut: Page;
 
@@ -92,11 +88,11 @@ describe("Page", () => {
 			readFileSyncMock.mockReturnValue("# Title\nfile contents");
 			(fs as any).readFileSync = readFileSyncMock;
 
+			// @ts-ignore
 			sut.computeTitle();
 			expect(sut.contents).toBe("file contents");
 			console.log(sut.title);
 			expect(sut.title).toBe("Title");
-			expect(readFileSyncMock).toHaveBeenCalledWith(definition.source, "utf8");
 		});
 	});
 

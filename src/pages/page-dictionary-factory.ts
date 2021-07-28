@@ -5,7 +5,6 @@
 
 import { join } from "path";
 import { PluginOptions } from "../options/models/";
-import { getFilename } from "../utilities/path-utilities";
 import { Page, PageDictionary } from "./models/";
 import * as fs from "fs";
 import { basename, dirname } from "path";
@@ -15,16 +14,16 @@ export class PageDictionaryFactory {
 	private options: PluginOptions;
 	private dictionary: PageDictionary;
 
-	protected walk(folderPath: string, parent?: Page) {
+	protected walk(folderPath: string, parent?: Page): void {
 
 		if (fs.existsSync(folderPath) && fs.lstatSync(folderPath).isDirectory()) {
 			fs.readdirSync(folderPath).forEach(f => {
 				this.addPage(join(folderPath, f), parent);
-			})
+			});
 		}
 	}
 
-	protected addPage(path: string, parent?: Page) : Page {
+	protected addPage(path: string, parent?: Page): Page {
 		console.log('walk', path, parent?true:false);
 		const page = Page.getPageFromFile(path, parent);
 		if (!page) {
@@ -55,7 +54,7 @@ export class PageDictionaryFactory {
 			options.sources.push(options.source);
 		}
 		if (!options.sources.length) {
-			throw new Error("Need to define at least one of source|sources")
+			throw new Error("Need to define at least one of source|sources");
 		}
 		
 		options.sources.forEach(f => {
@@ -64,10 +63,9 @@ export class PageDictionaryFactory {
 			} else {
 				this.addPage(f);
 			}
-		})
-		const pages = [...this.dictionary.all];
-		// @ts-ignore
-		console.log(pages.map(p => ({'title':p.title, 'src':p.source, 'parent': p.parent?true:false})));
+		});
+		//const pages = [...this.dictionary.all];
+		//console.log(pages.map(p => ({'title':p.title, 'src':p.source, 'parent': p.parent?true:false})));
 		return this.dictionary;
 	}
 }

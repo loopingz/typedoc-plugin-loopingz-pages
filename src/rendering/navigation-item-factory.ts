@@ -46,7 +46,7 @@ export class NavigationItemFactory {
 
 		let found = false;
 		let parent = pageRenderModel.pagesPlugin.item;
-		let parents = [];
+		const parents = [];
 		while (parent) {
 			if (parent === navigationItemPage) {
 				found = true;
@@ -73,7 +73,7 @@ export class NavigationItemFactory {
 	 * @param urlBeingRendered The URL of the current page render
 	 * @returns The created navigation items
 	 */
-	public buildChildPageItems(navigationItemPage: Page, urlBeingRendered: string, pages : Page[]): PluginNavigationItem[] {
+	public buildChildPageItems(navigationItemPage: Page, urlBeingRendered: string, pages: Page[]): PluginNavigationItem[] {
 		const items: PluginNavigationItem[] = [];
 
 		items.push(this.buildItem(navigationItemPage, navigationItemPage.url === urlBeingRendered, false));
